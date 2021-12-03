@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "704724001922",
+    "project_id": "let-s-unite-2021",
+    "storage_bucket": "let-s-unite-2021.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:704724001922:android:2f872066009cad682a409b",
+        "android_client_info": {
+          "package_name": "com.example.lets_unite"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "704724001922-pdsfh3ium5bger6vb6rnk0poaaderttq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.lets_unite",
+            "certificate_hash": "c8a87d6f29ef56ef228b126e3dbe10381a20edc2"
+          }
+        },
+        {
+          "client_id": "704724001922-5jtne7kugtctde3sk2jvt3rbhrgtt5o7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHJJWLFpJV5rpeOiMGNMZcN3JfhNEcLqI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "704724001922-5jtne7kugtctde3sk2jvt3rbhrgtt5o7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
