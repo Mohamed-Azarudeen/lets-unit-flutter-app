@@ -3,15 +3,21 @@ import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
+import 'package:lets_unite/controllers/location_pick_notifier.dart';
 import 'package:lets_unite/models/utils.dart';
 import 'package:lets_unite/screens/loc_pick.dart';
 import 'package:lets_unite/services/database.dart';
+import 'package:provider/provider.dart';
 
-class CreatePost extends StatefulWidget with ChangeNotifier{
+class CreatePost extends StatefulWidget{
   // final MyProfileData myData;
-  // CreatePost({required this.myData});
+  final double latitude;
+  final double longitude;
+  final String address;
+  CreatePost({required this.address, required this.latitude, required this.longitude});
   @override
   _CreatePostState createState() => _CreatePostState();
 }
@@ -35,6 +41,9 @@ class _CreatePostState extends State<CreatePost> {
   @override
   void initState() {
     super.initState();
+    pickedAddress = widget.address;
+    _pickedLatitude = widget.latitude;
+    _pickedLongitude = widget.longitude;
     pickedDate = DateTime.now();
     pickedTime = TimeOfDay.now();
   }
@@ -59,15 +68,24 @@ class _CreatePostState extends State<CreatePost> {
     });
     String postID = Utils.getRandomString(8) + Random().nextInt(500).toString();
     String postImageURL;
+    Geoflutterfire geo = Geoflutterfire();
+    GeoFirePoint location = geo.point(latitude: _pickedLatitude, longitude: _pickedLongitude);
     if(_postImageFile != null) {
       postImageURL = (await DatabaseMethods.uploadPostImages(postID: postID, postImageFile: _postImageFile as File))!.toString();
-      DatabaseMethods.sendPostInFirebase(postID, titleTextController.text, descTextController.text, _user.displayName.toString(), _user.photoURL.toString(), postImageURL, pickedAddress, _pickedLatitude, _pickedLongitude, pickedDate.toString(), pickedTime.toString());
+      DatabaseMethods.sendPostInFirebase(postID, titleTextController.text, descTextController.text, _user.displayName.toString(), _user.photoURL.toString(), postImageURL, pickedAddress, _pickedLatitude, _pickedLongitude, location, pickedDate.toString(), pickedTime.toString());
     }
 
     setState(() {
       _isLoading = false;
     });
-    Navigator.pop(context);
+    int count = 0;
+    Navigator.of(context).popUntil((_) => count++ >= 2);
+  }
+
+
+  final snackBar = SnackBar(content: Text('Fill all fields!!!'));
+  _snackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -78,7 +96,7 @@ class _CreatePostState extends State<CreatePost> {
         title: Text('Create Post'),
         actions: [
           FlatButton(
-              onPressed: _postToDB,
+              onPressed: (titleTextController.text.isNotEmpty)?_postToDB : _snackBar,
               child: Text('Post',
               style: TextStyle(
                 fontSize: 20,
@@ -99,7 +117,7 @@ class _CreatePostState extends State<CreatePost> {
                   width: size.width,
                   height: size.height - MediaQuery.of(context).viewInsets.bottom - 80,
                   child: Padding(
-                    padding: const EdgeInsets.only(right: 14.0, left: 10.0),
+                    padding: EdgeInsets.only(right: 14.0, left: 10.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -134,8 +152,9 @@ class _CreatePostState extends State<CreatePost> {
                                     focusNode: titleTextFocus,
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
-                                      hintText: 'Event Title',
+                                      labelText: 'Event Title',
                                       hintMaxLines: 2,
+                                      errorText: _titleValidation,
                                     ),
                                     controller: titleTextController,
                                     keyboardType: TextInputType.multiline,
@@ -145,7 +164,7 @@ class _CreatePostState extends State<CreatePost> {
                                     focusNode: descTextFocus,
                                     decoration: InputDecoration(
                                       border: InputBorder.none,
-                                      hintText: 'Description',
+                                      labelText: 'Description',
                                       hintMaxLines: 4,
                                     ),
                                     controller: descTextController,
@@ -160,7 +179,7 @@ class _CreatePostState extends State<CreatePost> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
                                 ListTile(
-                                  title: Text("Event Date: ${pickedDate.year}, ${pickedDate.month}, ${pickedDate.day}"),
+                                  title: Text("Event Date: ${pickedDate.day}-${pickedDate.month}-${pickedDate.year}"),
                                   trailing: Icon(Icons.date_range_sharp, color: Colors.indigo),
                                   onTap: _pickDate,
                                 ),
@@ -172,7 +191,7 @@ class _CreatePostState extends State<CreatePost> {
                                 ListTile(
                                   title: Text("Event Location: $pickedAddress"),
                                   trailing: Icon(Icons.location_on, color: Colors.indigo,),
-                                  onTap: _pickLocation,
+                                  // onTap: _pickLocation,
                                 ),
                                 ListTile(
                                   title: Text("Image: "),
@@ -222,7 +241,7 @@ class _CreatePostState extends State<CreatePost> {
   _pickDate() async {
     DateTime? date = await showDatePicker(
       context: context,
-      firstDate: DateTime(DateTime.now().year-5),
+      firstDate: DateTime(DateTime.now().year),
       lastDate: DateTime(DateTime.now().year+5),
       initialDate: pickedDate,
     );
@@ -246,13 +265,20 @@ class _CreatePostState extends State<CreatePost> {
   _pickLocation() {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => PickLocation()));
-      if(pickedAddress != null) {
         setState(() {
-          pickedAddress = markerAddress!;
-          _pickedLatitude = pickedLatitude;
-          _pickedLongitude = pickedLongitude;
+          final provider = Provider.of<LocationPickNotifier>(context, listen: true);
+          pickedAddress = provider.pickedAddress.toString();
+          _pickedLatitude = provider.pickedLatitude.toDouble();
+          _pickedLongitude = provider.pickedLongitude.toDouble();
         });
-      }
+  }
+
+  String? get _titleValidation {
+    final text = titleTextController.text;
+    if(text.isEmpty) {
+      return '*Fill this field';
+    }
+    return null;
   }
 
 }

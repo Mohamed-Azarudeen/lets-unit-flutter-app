@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:lets_unite/screens/post_items.dart';
 import 'package:lets_unite/services/database.dart';
 import 'package:lets_unite/widgets/comment_item.dart';
 import 'package:lets_unite/widgets/fullphoto.dart';
-
 import 'const.dart';
 import 'utils.dart';
 

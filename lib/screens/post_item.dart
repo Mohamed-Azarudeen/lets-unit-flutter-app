@@ -84,7 +84,10 @@ class _PostItemState extends State<PostItem> {
                   child: Column(
                     children: [
                       Text((widget.data['postTitle'] as String).length > 200 ? '${widget.data['postTitle'].substring(0, 132)} ...' : widget.data['postTitle'],
-                        style: TextStyle(fontSize: 16,),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                         maxLines: 3,),
                       Text((widget.data['postDesc'] as String).length > 200 ? '${widget.data['postDesc'].substring(0, 132)} ...' : widget.data['postDesc'],
                         style: TextStyle(fontSize: 16,),
@@ -93,21 +96,38 @@ class _PostItemState extends State<PostItem> {
                   )
                 ),
               ),
-              widget.data['postImage'] != 'NONE' ? GestureDetector(
-                  onTap: null,//() => widget.isFromThread ? widget.threadItemAction(widget.data) : widget.threadItemAction(),
-                  child: Utils.cacheNetworkImageWithEvent(context,widget.data['postImage'],0,0)) :
+              widget.data['postImage'] != 'NONE' ? Card(
+                elevation: 2.0,
+                child: GestureDetector(
+                    onTap: null,//() => widget.isFromThread ? widget.threadItemAction(widget.data) : widget.threadItemAction(),
+                    child: Utils.cacheNetworkImageWithEvent(context,widget.data['postImage'],0,0)),
+              ) :
               Container(),
-              Container(
-                  child: Text(widget.data['postLocation'],
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.indigo
-                    ),
-                  )),
+              Row(
+                children: [
+                  Icon(Icons.location_on_outlined, color: Colors.indigo,),
+                  Expanded(
+                    child: Text(widget.data['postLocation'],
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.indigo
+                      ),
+                    )
+                  ),
+                  ]
+              ),
               SizedBox(height: 15,),
-              Container(
-                child: Text('12:12:10'),
+              Row(
+                children: [
+                  Icon(Icons.date_range_sharp, color: Colors.indigo,),
+                  Text('${widget.data['postPickedDate']}',
+                    style: TextStyle(
+                        color: Colors.indigo,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16
+                    ),),
+                ],
               ),
               Divider(height: 2,color: Colors.black,),
             ],

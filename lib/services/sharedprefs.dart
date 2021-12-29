@@ -71,8 +71,8 @@ class SharedPreferenceHelper {
     prefs.setString('pickedAddress', address);
   }
 
-  Future<String?> getPickedAddress() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? getPickedAddress() {
+    SharedPreferences prefs = SharedPreferences.getInstance() as SharedPreferences;
     return prefs.getString('pickedAddress');
   }
 
@@ -81,8 +81,8 @@ class SharedPreferenceHelper {
     prefs.setDouble('pickedLatitude', lat);
   }
 
-  Future<double?> getPickedLatitude() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  double? getPickedLatitude() {
+    SharedPreferences prefs = SharedPreferences.getInstance() as SharedPreferences;
     return prefs.getDouble('pickedLatitude');
   }
 
@@ -91,8 +91,8 @@ class SharedPreferenceHelper {
     prefs.setDouble('pickedLongitude', lng);
   }
 
-  Future<double?> getPickedLongitude() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  double? getPickedLongitude() {
+    SharedPreferences prefs = SharedPreferences.getInstance() as SharedPreferences;
     return prefs.getDouble('pickedLongitude');
   }
 

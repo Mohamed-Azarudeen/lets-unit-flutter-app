@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:lets_unite/screens/create_post.dart';
 
 class PickLocation extends StatefulWidget {
   const PickLocation({Key? key}) : super(key: key);
@@ -10,14 +11,14 @@ class PickLocation extends StatefulWidget {
   _PickLocationState createState() => _PickLocationState();
 }
 
-late String? markerAddress = '';
-late double pickedLatitude;
-late double pickedLongitude;
 
 class _PickLocationState extends State<PickLocation> {
   static const _initialCameraPosition =
   CameraPosition(target: LatLng(13.010651, 80.2331943), zoom: 17);
 
+  late String? markerAddress = '';
+  late double pickedLatitude;
+  late double pickedLongitude;
   late GoogleMapController _googleMapController;
   late Position? initPos = getPosition();
   late Position? markerPos;
@@ -73,8 +74,7 @@ class _PickLocationState extends State<PickLocation> {
       value.latitude,
       value.longitude,
     ));
-    pickedLatitude = value.latitude;
-    pickedLongitude = value.longitude;
+
     markerAddress = placemarks[0].name! +
         ' ,' +
         placemarks[0].street! +
@@ -96,6 +96,10 @@ class _PickLocationState extends State<PickLocation> {
       value.latitude,
       value.longitude,
     ));
+    setState(() {
+      pickedLatitude = value.latitude;
+      pickedLongitude = value.longitude;
+    });
     print(placemarks);
     markerAddress = placemarks[0].name! +
         ' ,' +
@@ -168,7 +172,7 @@ class _PickLocationState extends State<PickLocation> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Choose location'),
+        title: Text('Pick Event location'),
       ),
       body: Stack(
         children: [
@@ -181,10 +185,10 @@ class _PickLocationState extends State<PickLocation> {
             markers: {
               _userLocation,
             },
-            onLongPress: (argument) {
+            onTap: (address) {
               print('long pressed');
-              print(argument);
-              _addMarker(argument);
+              print(address);
+              _addMarker(address);
             },
           ),
           Positioned(
@@ -192,20 +196,16 @@ class _PickLocationState extends State<PickLocation> {
             child: Column(
               children: [
                 ElevatedButton(
-                  // style: kButtonStyle.copyWith(
-                  //   padding: MaterialStateProperty.all<EdgeInsets>(
-                  //     const EdgeInsets.fromLTRB(50, 1, 50, 1),
-                  //   ),
-                  // ),
-                  onPressed: () =>
+                  onPressed: ()
                   {
-                    Navigator.pop(context)
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => CreatePost(address: markerAddress!, latitude: pickedLatitude, longitude: pickedLongitude)));
+                    // Navigator.pop(context);
                   },
                   child: Text(
                     "Confirm Location",
-                    // style: kButtonText.copyWith(
-                    //   fontSize: 20,
-                    // ),
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
                   ),
                 ),
                 Container(
@@ -213,7 +213,6 @@ class _PickLocationState extends State<PickLocation> {
                   color: Colors.white,
                   child: Text(
                     'Address: $markerAddress',
-                    // style: kButtonText.copyWith(color: Colors.black),
                   ),
                 ),
               ],

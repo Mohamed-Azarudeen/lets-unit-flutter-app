@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:lets_unite/models/const.dart';
 import 'package:lets_unite/models/utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,10 +30,16 @@ class DatabaseMethods {
         .snapshots();
   }
   
-  Future<Stream<QuerySnapshot>> getAllPosts() async {
+  Stream<QuerySnapshot> getAllPosts() {
     return FirebaseFirestore.instance
         .collection('posts')
         .orderBy('postTimeStamp', descending: true)
+        .snapshots();
+  }
+
+  Stream<QuerySnapshot> getAllMapPosts() {
+    return FirebaseFirestore.instance
+        .collection('posts')
         .snapshots();
   }
 
@@ -92,14 +99,8 @@ class DatabaseMethods {
     postData.reference.update({'postCommentCount': FieldValue.increment(1)});
   }
 
-  static Future<void> sendPostInFirebase(String postID,String postTitle, String postDesc, String userName,String userThumbnail, String postImageURL, String postAddress, double pickedLat, double pickedLng, String pickedDate, String pickedTime) async{
-    String postFCMToken;
-    // if(userProfile.myFCMToken == null){
-    //   SharedPreferences prefs = await SharedPreferences.getInstance();
-    //   postFCMToken = prefs.getString('FCMToken')!;
-    // }else {
-    //   postFCMToken = userProfile.myFCMToken;
-    // }
+  static Future<void> sendPostInFirebase(String postID,String postTitle, String postDesc, String userName,String userThumbnail, String postImageURL, String postAddress, double pickedLat, double pickedLon, GeoFirePoint location, String pickedDate, String pickedTime) async{
+
     FirebaseFirestore.instance.collection('posts').doc(postID).set({
       'postID':postID,
       'userName':userName,
@@ -109,13 +110,13 @@ class DatabaseMethods {
       'postDesc':postDesc,
       'postImage':postImageURL,
       'postLocation': postAddress,
-      'postPickedLatitude': pickedLat,
-      'postPickedLongitude': pickedLng,
       'postPickedDate': pickedDate,
       'postPickedTime': pickedTime,
       'postLikeCount':0,
       'postVolunteerCount':0,
-      // 'FCMToken':postFCMToken
+      'postPickedLatitude': pickedLat,
+      'postPickedLongitude': pickedLon,
+      'position': location.data,
     });
   }
 
